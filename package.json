@@ -1,0 +1,16 @@
+{
+  "name": "scrape-ahrefs",
+  "version": "1.0.0",
+  "description": "Scrape ahrefs.com's Site Explorer and Content Explorer",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index"
+  },
+  "keywords": [],
+  "author": "Saurabh Raje",
+  "license": "MIT",
+  "dependencies": {
+    "json-2-csv": "^3.4.1",
+    "puppeteer": "^1.12.2"
+  }
+}
