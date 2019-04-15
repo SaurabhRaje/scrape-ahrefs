@@ -22,6 +22,7 @@ const fetchSectionData = (page, section, queries) => {
         }
 
         let fetchTotal = 0;
+        const collatedData = [];
         const path = Utils.getPath(section);
 
         for (let i = 0, len = queries.length; i < len; i++) {
@@ -34,12 +35,24 @@ const fetchSectionData = (page, section, queries) => {
             console.log(`\nGot ${queryData.length} items for "${query}"`);
             fetchTotal += queryData.length;
 
-            let filename = `${path}/${query.toLowerCase().replace(/\s/g, "_").replace(/\W+/g, "-").replace(/-$/, "")}.csv`;
-            let writeResult = await Utils.writeOutputFile(queryData, path, filename);
+            if (args.collate === "y") {
+                collatedData.push(...queryData);
+            }
+            else {
+                let filename = `${path}/${query.toLowerCase().replace(/\s/g, "_").replace(/\W+/g, "-").replace(/-$/, "")}.csv`;
+                let writeResult = await Utils.writeOutputFile(queryData, path, filename);
+                console.log(writeResult);
+            }
 
-            console.log(writeResult);
             console.timeEnd("Query time");
         }
+
+        if (args.collate === "y") {
+            let filename = `${path}/${path.substr(path.lastIndexOf("/") + 1)}.csv`;
+            let writeResult = await Utils.writeOutputFile(collatedData, path, filename);
+            console.log(`\n${writeResult}`);
+        }
+
         resolve(fetchTotal);
     });
 };
@@ -72,11 +85,14 @@ const closeBrowser = async browser => {
 
     const queries = await Utils.readInputFile(`src/csv/${section}/queries.csv`);
     if (Array.isArray(queries) && queries.length) {
-        const browser = await puppeteer.launch({ headless: args.headless !== "n", devtools: false });
+        const browser = await puppeteer.launch({
+            headless: args.headless !== "n",
+            devtools: args.devtools === "y"
+        });
 
         const page = (await browser.pages())[0];
         page.setViewport({ width: 1366, height: 768 });
-        console.log("Browser opened");
+        console.log("\nBrowser opened");
 
         console.log("Logging in...");
         try {

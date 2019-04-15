@@ -9,8 +9,8 @@ const parseArgs = (args) => {
             parsedArgs[match[1]] = match[2];
         }
     });
-    console.log("Arguments received:");
-    console.dir(parsedArgs);
+    console.log("Options:");
+    console.table(parsedArgs);
     return parsedArgs;
 };
 
@@ -25,7 +25,7 @@ const readInputFile = filename => {
     return new Promise((resolve, reject) => {
         fs.readFile(filename, "utf8", (err, csv) => {
             if (err) return reject(err.message);
-            console.log(`"${filename}" read`);
+            console.log(`\n"${filename}" read`);
 
             csv = csv.replace(/\r\n/g, "\n");
             converter.csv2jsonAsync(csv, { excelBOM: true }).then(json => {
