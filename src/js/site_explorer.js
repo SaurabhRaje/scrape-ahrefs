@@ -18,7 +18,9 @@ const fetchPageData = async (page, query, url) => {
                         domain_rating: result.DomainRating,
                         url_rating: result.ahrefs_rank,
                         refdomains: result.refdomains,
+                        text_pre: result.text_pre,
                         anchor: result.anchor,
+                        text_post: result.text_post,
                         first_seen: result.first_seen,
                         last_check: result.last_visited,
                         similar_backlinks: result.TotalBacklinks
