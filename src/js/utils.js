@@ -1,7 +1,7 @@
 const fs = require("fs");
 const converter = require("json-2-csv");
 
-const parseArgs = (args) => {
+const parseArgs = args => {
     const parsedArgs = {};
     args.forEach(arg => {
         let match = arg.match(/^--(\w+)=(\S+)$/);
@@ -51,18 +51,18 @@ const writeOutputFile = (json, path, filename) => {
 };
 
 const login = async (page, username, password) => {
-    await page.goto("https://ahrefs.com");
+    await page.goto("https://ahrefs.com/user/login");
     page.evaluate((username, password) => {
-        $("#signIn").click();
-        $("#formLogin input[type='email']").val(username);
-        $("#formLogin input[type='password']").val(password);
-        $("#formLogin input[type='checkbox']").click();
-        $("#formLogin button[type='submit']").click();
+        $("#formLogin input[name='email']").val(username);
+        $("#formLogin input[name='password']").val(password);
+        $("#formLogin input[name='remember_me']").click();
+        $("#formLogin input[type='submit']").click();
     }, username, password);
     return page.waitForNavigation({ waitUntil: "domcontentloaded" });
 };
 
 const setItemCount = async page => {
+    await page.goto("https://ahrefs.com/site-explorer");
     page.evaluate(() => {
         SetItemsPerPage(100, window.location.href, "se");
     });
