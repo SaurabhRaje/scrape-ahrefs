@@ -86,7 +86,7 @@ const closeBrowser = async browser => {
     const queries = await Utils.readInputFile(`src/csv/${section}/queries.csv`);
     if (Array.isArray(queries) && queries.length) {
         const browser = await puppeteer.launch({
-            headless: args.headless !== "n",
+            headless: args.headless === "y",
             devtools: args.devtools === "y"
         });
 
@@ -105,8 +105,10 @@ const closeBrowser = async browser => {
         }
         console.log("Login complete");
 
-        await Utils.setItemCount(page);
-        console.log("Items per page set to 100");
+        if (section === "site_explorer") {
+            await Utils.setItemCount(page);
+            console.log("Items per page set to 100");
+        }
 
         const fetchResult = await fetchSectionData(page, section, queries);
         console.log("\nOperation complete");

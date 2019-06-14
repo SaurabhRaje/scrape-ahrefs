@@ -1,36 +1,35 @@
 const fetchPageData = async (page, query, url) => {
     try {
         await page.goto(url, { waitUntil: "domcontentloaded" });
+
+        let response = await page.waitForResponse("https://ahrefs.com/v3/api-adaptor/ceSearchResults");
+        if (response.ok()) {
+            response = await response.json();
+
+            let results = response[1].results.map(result => ({
+                query,
+                title: result.title,
+                url: result.url,
+                domain_rating: result.domainRating,
+                refdomains: result.refDomains[1],
+                traffic: Math.round(result.traffic[1])
+            }));
+            return results;
+        }
+        return [];
     }
     catch (err) {
         return [];
     }
-
-    return page.evaluate((originalUrl, query) => {
-        if (window.location.href === originalUrl) {
-            const data = $("body").data(window.location.href);
-            if (data && Array.isArray(data.result)) {
-                return data.result.map(result => {
-                    return {
-                        query,
-                        title: result.title,
-                        url: result.url,
-                        domain_rating: result.domain_rating,
-                        refdomains: result.refdomains,
-                        traffic: result.traffic
-                    };
-                });
-            }
-        }
-        return [];
-    }, url, query);
 };
 
 const fetchQueryData = (page, query, maxPages = 1) => {
     return new Promise(async resolve => {
         let pageData = [];
         for (let pageNum = 1; pageNum <= maxPages; pageNum++) {
-            let url = `https://ahrefs.com/content-explorer/overview/v4/all/${pageNum}/score_desc?topic=${encodeURIComponent(query)}&dateRange=2018-12-01,2019-02-28&filter-refdomains=25-0`;
+            let today = new Date().toISOString().substr(0, 10);
+            let lastYear = new Date(Number(today.substr(0, 4)) - 1 + today.substr(4)).toISOString().substr(0, 10);
+            let url = `https://ahrefs.com/content-explorer/results/en/score_desc?topic=${encodeURIComponent(query)}&filter-broken-pages=all&publish_type=all&published=${encodeURIComponent(lastYear + "T00:00:00+05:30")},${encodeURIComponent(today + "T23:59:59+05:30")}&filter-refdomains=25-&chart-range=last_30_days&page=${pageNum}&results-per-page=100`;
 
             console.time("- Page time");
             console.log(`\n- Fetching page #${pageNum}...`);
